@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: order-001-create-orders
+      author: aditya
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: orders
+      changes:
+        - sqlFile:
+            path: sql/20260704_create_order_table.sql
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: order-002-order-indexes
+      author: aditya
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - indexExists:
+                indexName: idx_orders_product_id
+      changes:
+        - sqlFile:
+            path: sql/20260704_create_order_indexes.sql
+            relativeToChangelogFile: true
+

@@ -1,0 +1,62 @@
+replicaCount:
+  order: 3
+  inventory: 3
+  gateway: 2
+image:
+  order: order-service:1.0.0
+  inventory: inventory-service:1.0.0
+  gateway: gateway-service:1.0.0
+  pullPolicy: IfNotPresent
+security:
+  jwt:
+    secret: dev-jwt-signing-secret-change-me-32chars-minimum
+postgres:
+  enabled: true
+  image: postgres:15
+  username: appuser
+  password: app_pass
+  orderDatabase: orderdb
+  inventoryDatabase: inventorydb
+  persistence:
+    enabled: true
+    size: 1Gi
+inventory:
+  threshold: 10
+service:
+  inventoryUrl: http://inventory-service:8082
+resources:
+  order:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  inventory:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  gateway:
+    requests:
+      cpu: 200m
+      memory: 384Mi
+    limits:
+      cpu: 750m
+      memory: 768Mi
+autoscaling:
+  order:
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  inventory:
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  gateway:
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+

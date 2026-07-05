@@ -1,0 +1,90 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: inventorydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d inventorydb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      microservices:
+        aliases:
+          - postgres-db
+  redis:
+    image: redis:7-alpine
+    networks:
+      microservices:
+        aliases:
+          - redis
+  inventory:
+    build:
+      context: .
+      dockerfile: inventory-service/Dockerfile
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventorydb
+      - SPRING_DATASOURCE_USERNAME=appuser
+      - SPRING_DATASOURCE_PASSWORD=app_pass
+      - SPRING_DATA_REDIS_HOST=redis
+      - SECURITY_JWT_SECRET=dev-jwt-signing-secret-change-me-32chars-minimum
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      microservices:
+        aliases:
+          - inventory-service
+  order:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/orderdb
+      - SPRING_DATASOURCE_USERNAME=appuser
+      - SPRING_DATASOURCE_PASSWORD=app_pass
+      - SPRING_DATA_REDIS_HOST=redis
+      - INVENTORY_URL=http://inventory:8082
+      - SECURITY_JWT_SECRET=dev-jwt-signing-secret-change-me-32chars-minimum
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      microservices:
+        aliases:
+          - order-service
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      - ORDER_SERVICE_URL=http://order:8081
+      - INVENTORY_SERVICE_URL=http://inventory:8082
+      - SECURITY_JWT_SECRET=dev-jwt-signing-secret-change-me-32chars-minimum
+    depends_on:
+      order:
+        condition: service_started
+      inventory:
+        condition: service_started
+    networks:
+      microservices:
+        aliases:
+          - gateway-service
+volumes:
+  pgdata:
+networks:
+  microservices:
+    driver: bridge

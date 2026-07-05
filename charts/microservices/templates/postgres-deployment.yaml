@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.postgres.image }}
+        env:
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: pgdata
+        - mountPath: /docker-entrypoint-initdb.d
+          name: postgres-init
+      volumes:
+      - name: pgdata
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: postgres-init
+        configMap:
+          name: postgres-init
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+data:
+  init.sql: |
+    CREATE DATABASE {{ .Values.postgres.inventoryDatabase }};
+    CREATE DATABASE {{ .Values.postgres.orderDatabase }};
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '{{ .Values.postgres.username }}') THEN
+        CREATE USER {{ .Values.postgres.username }} WITH PASSWORD '{{ .Values.postgres.password }}';
+      END IF;
+    END
+    $$;
+    GRANT ALL PRIVILEGES ON DATABASE {{ .Values.postgres.inventoryDatabase }} TO {{ .Values.postgres.username }};
+    GRANT ALL PRIVILEGES ON DATABASE {{ .Values.postgres.orderDatabase }} TO {{ .Values.postgres.username }};
+    \c {{ .Values.postgres.orderDatabase }}
+    GRANT ALL ON SCHEMA public TO {{ .Values.postgres.username }};
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {{ .Values.postgres.username }};
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {{ .Values.postgres.username }};
+    \c {{ .Values.postgres.inventoryDatabase }}
+    GRANT ALL ON SCHEMA public TO {{ .Values.postgres.username }};
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {{ .Values.postgres.username }};
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {{ .Values.postgres.username }};
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 1Gi
+

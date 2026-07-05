@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-config
+data:
+  inventory.threshold: "10"
+  inventory.properties: |
+    inventory.threshold=10
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-config
+data:
+  inventory.url: "http://inventory-service:8082"
+

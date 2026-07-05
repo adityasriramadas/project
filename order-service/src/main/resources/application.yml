@@ -1,0 +1,122 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: order-service
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orderdb
+    username: appuser
+    password: app_pass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 1000
+      validation-timeout: 500
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+  
+  # Liquibase Configuration
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+  
+  # Redis Configuration
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+  
+  # Cache Configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: 1800000
+      cache-null-values: false
+  
+  # WebFlux Configuration
+  webflux:
+    multipart:
+      enabled: true
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventory:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        waitDurationInOpenState: 3s
+        slidingWindowSize: 10
+      inventoryRelease:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        waitDurationInOpenState: 3s
+        slidingWindowSize: 10
+  retry:
+    instances:
+      inventory:
+        maxAttempts: 1
+        waitDuration: 100ms
+      inventoryRelease:
+        maxAttempts: 1
+        waitDuration: 100ms
+
+inventory:
+  url: http://localhost:8082
+  client:
+    timeout: 3s
+
+# Logging Configuration
+logging:
+  level:
+    com.project.orders: INFO
+    com.project.common: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /order/api-docs/swagger-config
+    url: /order/api-docs
+
+app:
+  openapi:
+    server-url: http://localhost:8080
+    server-description: Order API Gateway URL

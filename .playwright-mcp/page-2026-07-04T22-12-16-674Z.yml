@@ -1,0 +1,150 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - img [ref=e8]
+    - generic [ref=e43]:
+      - textbox [ref=e44]: /inventory/api-docs
+      - button "Explore" [ref=e45] [cursor=pointer]
+  - generic [ref=e46]:
+    - generic:
+      - img
+    - generic [ref=e48]:
+      - generic [ref=e53]:
+        - heading "OpenAPI definition v0 OAS 3.0" [level=2] [ref=e54]:
+          - text: OpenAPI definition
+          - generic [ref=e55]:
+            - generic [ref=e57]: v0
+            - generic [ref=e59]: OAS 3.0
+        - link "/inventory/api-docs" [ref=e60] [cursor=pointer]:
+          - /url: /inventory/api-docs
+          - generic [ref=e61]: /inventory/api-docs
+      - generic [ref=e63]:
+        - generic [ref=e65]:
+          - text: Servers
+          - combobox [ref=e68]:
+            - option "http://localhost:8080 - Inventory API Gateway URL" [selected]
+        - generic [ref=e69]:
+          - button "Authorize" [ref=e70] [cursor=pointer]:
+            - generic [ref=e71]: Authorize
+            - img [ref=e72]
+          - generic [ref=e240]:
+            - generic [ref=e241]:
+              - heading "Available authorizations" [level=3] [ref=e242]
+              - button [ref=e243] [cursor=pointer]:
+                - img [ref=e244]
+            - generic [ref=e248]:
+              - generic [ref=e249]:
+                - heading "bearerAuth (http, Bearer)" [level=4] [ref=e250]:
+                  - code [ref=e251]: bearerAuth
+                  - text: (http, Bearer)
+                - generic [ref=e252]:
+                  - text: "Value:"
+                  - textbox "auth-bearer-value" [active] [ref=e254]
+              - generic [ref=e255]:
+                - button "Apply credentials" [ref=e256] [cursor=pointer]: Authorize
+                - button "Close" [ref=e257] [cursor=pointer]
+      - generic [ref=e78]:
+        - heading "Product Inventory Management APIs for managing product inventory Collapse operation" [level=3] [ref=e79] [cursor=pointer]:
+          - link "Product Inventory Management" [ref=e80]:
+            - /url: "#/Product%20Inventory%20Management"
+          - paragraph [ref=e83]: APIs for managing product inventory
+          - button "Collapse operation" [expanded] [ref=e84]:
+            - img [ref=e85]
+        - generic [ref=e88]:
+          - generic [ref=e91] [cursor=pointer]:
+            - button "POST /inventory/reserve Reserve inventory" [ref=e92]:
+              - generic [ref=e93]: POST
+              - generic [ref=e94]:
+                - link "/inventory/reserve" [ref=e96]:
+                  - /url: "#/Product%20Inventory%20Management/reserveStock"
+                  - generic [ref=e97]:
+                    - text: /inventory
+                    - text: /reserve
+                - generic [ref=e98]: Reserve inventory
+            - generic "Copy to clipboard"
+            - button "authorization button unlocked" [ref=e101]:
+              - img [ref=e102]
+            - button "post /inventory/reserve" [ref=e104]:
+              - img [ref=e105]
+          - generic [ref=e109] [cursor=pointer]:
+            - button "POST /inventory/release Release inventory" [ref=e110]:
+              - generic [ref=e111]: POST
+              - generic [ref=e112]:
+                - link "/inventory/release" [ref=e114]:
+                  - /url: "#/Product%20Inventory%20Management/releaseStock"
+                  - generic [ref=e115]:
+                    - text: /inventory
+                    - text: /release
+                - generic [ref=e116]: Release inventory
+            - generic "Copy to clipboard"
+            - button "authorization button unlocked" [ref=e119]:
+              - img [ref=e120]
+            - button "post /inventory/release" [ref=e122]:
+              - img [ref=e123]
+          - generic [ref=e127] [cursor=pointer]:
+            - button "GET /inventory/product List all products" [ref=e128]:
+              - generic [ref=e129]: GET
+              - generic [ref=e130]:
+                - link "/inventory/product" [ref=e132]:
+                  - /url: "#/Product%20Inventory%20Management/listProducts"
+                  - generic [ref=e133]:
+                    - text: /inventory
+                    - text: /product
+                - generic [ref=e134]: List all products
+            - generic "Copy to clipboard"
+            - button "authorization button unlocked" [ref=e137]:
+              - img [ref=e138]
+            - button "get /inventory/product" [ref=e140]:
+              - img [ref=e141]
+          - generic [ref=e145] [cursor=pointer]:
+            - button "POST /inventory/product Create or Update Product" [ref=e146]:
+              - generic [ref=e147]: POST
+              - generic [ref=e148]:
+                - link "/inventory/product" [ref=e150]:
+                  - /url: "#/Product%20Inventory%20Management/createOrUpdateProduct"
+                  - generic [ref=e151]:
+                    - text: /inventory
+                    - text: /product
+                - generic [ref=e152]: Create or Update Product
+            - generic "Copy to clipboard"
+            - button "authorization button unlocked" [ref=e155]:
+              - img [ref=e156]
+            - button "post /inventory/product" [ref=e158]:
+              - img [ref=e159]
+          - generic [ref=e163] [cursor=pointer]:
+            - 'button "GET /inventory/product/{id} Get product by ID" [ref=e164]':
+              - generic [ref=e165]: GET
+              - generic [ref=e166]:
+                - 'link "/inventory/product/{id}" [ref=e168]':
+                  - /url: "#/Product%20Inventory%20Management/getProduct"
+                  - generic [ref=e169]:
+                    - text: /inventory
+                    - text: /product
+                    - text: "/{id}"
+                - generic [ref=e170]: Get product by ID
+            - generic "Copy to clipboard"
+            - button "authorization button unlocked" [ref=e173]:
+              - img [ref=e174]
+            - 'button "get /inventory/product/{id}" [ref=e176]':
+              - img [ref=e177]
+      - generic [ref=e181]:
+        - heading "Schemas" [level=4] [ref=e182] [cursor=pointer]:
+          - button "Schemas" [expanded] [ref=e183]:
+            - generic [ref=e184]: Schemas
+            - img [ref=e185]
+        - generic [ref=e187]:
+          - button "InventoryReservationRequest" [ref=e190] [cursor=pointer]:
+            - generic [ref=e192]: InventoryReservationRequest
+          - button "InventoryReservationResponse" [ref=e196] [cursor=pointer]:
+            - generic [ref=e198]: InventoryReservationResponse
+          - button "ResponseInventoryReservationResponse" [ref=e202] [cursor=pointer]:
+            - generic [ref=e204]: ResponseInventoryReservationResponse
+          - button "ProductRequest" [ref=e208] [cursor=pointer]:
+            - generic [ref=e210]: ProductRequest
+          - button "ProductResponse" [ref=e214] [cursor=pointer]:
+            - generic [ref=e216]: ProductResponse
+          - button "ResponseProductResponse" [ref=e220] [cursor=pointer]:
+            - generic [ref=e222]: ResponseProductResponse
+          - button "PageResponseProductResponse" [ref=e226] [cursor=pointer]:
+            - generic [ref=e228]: PageResponseProductResponse
+          - button "ResponsePageResponseProductResponse" [ref=e232] [cursor=pointer]:
+            - generic [ref=e234]: ResponsePageResponseProductResponse

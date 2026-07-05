@@ -1,0 +1,57 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      routes:
+        - id: order-docs
+          uri: ${ORDER_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/order/swagger-ui.html,/order/swagger-ui/**,/order/api-docs,/order/api-docs/**
+          filters:
+            - RewritePath=/order/(?<segment>.*), /$\{segment}
+        - id: inventory-docs
+          uri: ${INVENTORY_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/inventory/swagger-ui.html,/inventory/swagger-ui/**,/inventory/api-docs,/inventory/api-docs/**
+          filters:
+            - RewritePath=/inventory/(?<segment>.*), /$\{segment}
+        - id: orders
+          uri: ${ORDER_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/order/**,/orders/**
+        - id: inventory
+          uri: ${INVENTORY_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/inventory/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: gateway-service
+    description: Unified API entry point
+
+logging:
+  pattern:
+    level: "%5p [correlationId:%X{correlationId:-}]"

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microservices-inventory-config
+data:
+  inventory.properties: |
+    inventory.threshold={{ .Values.inventory.threshold }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microservices-service-config
+data:
+  inventory.url: {{ .Values.service.inventoryUrl | quote }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: microservices-secret
+type: Opaque
+stringData:
+  order.datasource.url: jdbc:postgresql://postgres:5432/{{ .Values.postgres.orderDatabase }}
+  inventory.datasource.url: jdbc:postgresql://postgres:5432/{{ .Values.postgres.inventoryDatabase }}
+  datasource.username: {{ .Values.postgres.username | quote }}
+  datasource.password: {{ .Values.postgres.password | quote }}
+  security.jwt.secret: {{ .Values.security.jwt.secret | quote }}
+

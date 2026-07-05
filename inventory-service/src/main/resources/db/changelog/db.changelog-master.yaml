@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: inventory-001-create-products
+      author: aditya
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: products
+      changes:
+        - sqlFile:
+            path: sql/20260704_create_product_table.sql
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: inventory-002-product-indexes
+      author: aditya
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - indexExists:
+                indexName: idx_products_quantity
+      changes:
+        - sqlFile:
+            path: sql/20260704_create_product_indexes.sql
+            relativeToChangelogFile: true
+

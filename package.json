@@ -1,0 +1,29 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "This project is a small microservices system that handles two things:",
+  "main": "index.js",
+  "directories": {
+    "doc": "Design Diagrams"
+  },
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adityasriramadas/project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/adityasriramadas/project/issues"
+  },
+  "homepage": "https://github.com/adityasriramadas/project#readme",
+  "devDependencies": {
+    "@playwright/mcp": "^0.0.77",
+    "@playwright/test": "^1.61.1"
+  }
+}

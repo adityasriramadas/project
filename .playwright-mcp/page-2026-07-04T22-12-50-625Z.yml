@@ -1,0 +1,175 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - img [ref=e8]
+    - generic [ref=e43]:
+      - textbox [ref=e44]: /inventory/api-docs
+      - button "Explore" [ref=e45] [cursor=pointer]
+  - generic [ref=e46]:
+    - generic:
+      - img
+    - generic [ref=e48]:
+      - generic [ref=e53]:
+        - heading "OpenAPI definition v0 OAS 3.0" [level=2] [ref=e54]:
+          - text: OpenAPI definition
+          - generic [ref=e55]:
+            - generic [ref=e57]: v0
+            - generic [ref=e59]: OAS 3.0
+        - link "/inventory/api-docs" [ref=e60] [cursor=pointer]:
+          - /url: /inventory/api-docs
+          - generic [ref=e61]: /inventory/api-docs
+      - generic [ref=e63]:
+        - generic [ref=e65]:
+          - text: Servers
+          - combobox [ref=e68]:
+            - option "http://localhost:8080 - Inventory API Gateway URL" [selected]
+        - button "Authorize" [ref=e70] [cursor=pointer]:
+          - generic [ref=e71]: Authorize
+          - img [ref=e258]
+      - generic [ref=e78]:
+        - heading "Product Inventory Management APIs for managing product inventory Collapse operation" [level=3] [ref=e79] [cursor=pointer]:
+          - link "Product Inventory Management" [ref=e80]:
+            - /url: "#/Product%20Inventory%20Management"
+          - paragraph [ref=e83]: APIs for managing product inventory
+          - button "Collapse operation" [expanded] [ref=e84]:
+            - img [ref=e85]
+        - generic [ref=e88]:
+          - generic [ref=e91] [cursor=pointer]:
+            - button "POST /inventory/reserve Reserve inventory" [ref=e92]:
+              - generic [ref=e93]: POST
+              - generic [ref=e94]:
+                - link "/inventory/reserve" [ref=e96]:
+                  - /url: "#/Product%20Inventory%20Management/reserveStock"
+                  - generic [ref=e97]:
+                    - text: /inventory
+                    - text: /reserve
+                - generic [ref=e98]: Reserve inventory
+            - generic "Copy to clipboard"
+            - button "authorization button locked" [ref=e263]:
+              - img [ref=e264]
+            - button "post /inventory/reserve" [ref=e104]:
+              - img [ref=e105]
+          - generic [ref=e109] [cursor=pointer]:
+            - button "POST /inventory/release Release inventory" [ref=e110]:
+              - generic [ref=e111]: POST
+              - generic [ref=e112]:
+                - link "/inventory/release" [ref=e114]:
+                  - /url: "#/Product%20Inventory%20Management/releaseStock"
+                  - generic [ref=e115]:
+                    - text: /inventory
+                    - text: /release
+                - generic [ref=e116]: Release inventory
+            - generic "Copy to clipboard"
+            - button "authorization button locked" [ref=e266]:
+              - img [ref=e267]
+            - button "post /inventory/release" [ref=e122]:
+              - img [ref=e123]
+          - generic [ref=e127] [cursor=pointer]:
+            - button "GET /inventory/product List all products" [ref=e128]:
+              - generic [ref=e129]: GET
+              - generic [ref=e130]:
+                - link "/inventory/product" [ref=e132]:
+                  - /url: "#/Product%20Inventory%20Management/listProducts"
+                  - generic [ref=e133]:
+                    - text: /inventory
+                    - text: /product
+                - generic [ref=e134]: List all products
+            - generic "Copy to clipboard"
+            - button "authorization button locked" [ref=e269]:
+              - img [ref=e270]
+            - button "get /inventory/product" [ref=e140]:
+              - img [ref=e141]
+          - generic [ref=e144]:
+            - generic [ref=e145] [cursor=pointer]:
+              - button "POST /inventory/product Create or Update Product" [expanded] [ref=e146]:
+                - generic [ref=e147]: POST
+                - generic [ref=e148]:
+                  - link "/inventory/product" [ref=e150]:
+                    - /url: "#/Product%20Inventory%20Management/createOrUpdateProduct"
+                    - generic [ref=e151]:
+                      - text: /inventory
+                      - text: /product
+                  - generic [ref=e152]: Create or Update Product
+              - generic "Copy to clipboard"
+              - button "authorization button locked" [ref=e272]:
+                - img [ref=e273]
+              - button "post /inventory/product" [expanded] [ref=e158]:
+                - img [ref=e280]
+            - generic [ref=e283]:
+              - generic [ref=e284]:
+                - generic [ref=e285]:
+                  - heading "Parameters" [level=4] [ref=e288] [cursor=pointer]
+                  - button "Cancel" [active] [ref=e345] [cursor=pointer]
+                - paragraph [ref=e293]: No parameters
+                - generic [ref=e294]:
+                  - generic [ref=e295]:
+                    - heading "Request bodyrequired" [level=4] [ref=e296]
+                    - combobox "Request content type" [ref=e299]:
+                      - option "application/json" [selected]
+                  - textbox [ref=e348]: "{ \"id\": \"PROD-001\", \"name\": \"Wireless Mouse\", \"description\": \"Ergonomic wireless mouse with USB-C charging\", \"category\": \"Electronics\", \"brand\": \"Logitech\", \"quantity\": 100, \"reorderThreshold\": 10, \"unitPrice\": 49.99, \"currency\": \"USD\", \"active\": true }"
+              - button "Execute" [ref=e349] [cursor=pointer]
+              - generic [ref=e311]:
+                - heading "Responses" [level=4] [ref=e313]
+                - region [ref=e315]:
+                  - rowgroup [ref=e316]:
+                    - row "Code Description Links" [ref=e317]:
+                      - cell "Code" [ref=e318]
+                      - cell "Description" [ref=e319]
+                      - cell "Links" [ref=e320]
+                  - rowgroup [ref=e321]:
+                    - row "200 OK Media type */* Controls Accept header. Example Value No links" [ref=e322]:
+                      - cell "200" [ref=e323]
+                      - cell "OK Media type */* Controls Accept header. Example Value" [ref=e324]:
+                        - paragraph [ref=e327]: OK
+                        - generic [ref=e329]:
+                          - generic [ref=e330]: Media type
+                          - combobox "Media Type" [ref=e332]:
+                            - option "*/*" [selected]
+                          - generic [ref=e333]:
+                            - text: Controls
+                            - code [ref=e334]: Accept
+                            - text: header.
+                        - generic [ref=e335]:
+                          - tablist [ref=e336]:
+                            - tab "Example Value" [selected] [ref=e337] [cursor=pointer]
+                            - tab "Schema" [ref=e338] [cursor=pointer]
+                          - tabpanel "Example Value" [ref=e339]:
+                            - code [ref=e343]: "{ \"success\": true, \"code\": \"string\", \"message\": \"string\", \"data\": { \"id\": \"PROD-001\", \"name\": \"Wireless Mouse\", \"description\": \"Ergonomic wireless mouse with USB-C charging\", \"category\": \"Electronics\", \"brand\": \"Logitech\", \"quantity\": 100, \"reorderThreshold\": 10, \"lowStock\": false, \"unitPrice\": 49.99, \"currency\": \"USD\", \"active\": true, \"createdAt\": \"2025-01-01T10:00:00Z\", \"updatedAt\": \"2025-01-01T11:00:00Z\" }, \"timestamp\": \"2026-07-04T22:12:50.082Z\" }"
+                      - cell "No links" [ref=e344]
+          - generic [ref=e163] [cursor=pointer]:
+            - 'button "GET /inventory/product/{id} Get product by ID" [ref=e164]':
+              - generic [ref=e165]: GET
+              - generic [ref=e166]:
+                - 'link "/inventory/product/{id}" [ref=e168]':
+                  - /url: "#/Product%20Inventory%20Management/getProduct"
+                  - generic [ref=e169]:
+                    - text: /inventory
+                    - text: /product
+                    - text: "/{id}"
+                - generic [ref=e170]: Get product by ID
+            - generic "Copy to clipboard"
+            - button "authorization button locked" [ref=e275]:
+              - img [ref=e276]
+            - 'button "get /inventory/product/{id}" [ref=e176]':
+              - img [ref=e177]
+      - generic [ref=e181]:
+        - heading "Schemas" [level=4] [ref=e182] [cursor=pointer]:
+          - button "Schemas" [expanded] [ref=e183]:
+            - generic [ref=e184]: Schemas
+            - img [ref=e185]
+        - generic [ref=e187]:
+          - button "InventoryReservationRequest" [ref=e190] [cursor=pointer]:
+            - generic [ref=e192]: InventoryReservationRequest
+          - button "InventoryReservationResponse" [ref=e196] [cursor=pointer]:
+            - generic [ref=e198]: InventoryReservationResponse
+          - button "ResponseInventoryReservationResponse" [ref=e202] [cursor=pointer]:
+            - generic [ref=e204]: ResponseInventoryReservationResponse
+          - button "ProductRequest" [ref=e208] [cursor=pointer]:
+            - generic [ref=e210]: ProductRequest
+          - button "ProductResponse" [ref=e214] [cursor=pointer]:
+            - generic [ref=e216]: ProductResponse
+          - button "ResponseProductResponse" [ref=e220] [cursor=pointer]:
+            - generic [ref=e222]: ResponseProductResponse
+          - button "PageResponseProductResponse" [ref=e226] [cursor=pointer]:
+            - generic [ref=e228]: PageResponseProductResponse
+          - button "ResponsePageResponseProductResponse" [ref=e232] [cursor=pointer]:
+            - generic [ref=e234]: ResponsePageResponseProductResponse

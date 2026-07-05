@@ -1,0 +1,845 @@
+{
+  "info": {
+    "_postman_id": "8a7109f4-2a5b-4c99-a2d1-2ce15d809e0f",
+    "name": "Order Inventory Microservices",
+    "description": "Postman collection for the Order, Inventory, and API Gateway services. The collection pre-request script generates a local HS256 Bearer JWT using the demo Docker secret.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwtToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "function base64Url(input) {",
+          "  return CryptoJS.enc.Base64.stringify(input)",
+          "    .replace(/=+$/, '')",
+          "    .replace(/\\+/g, '-')",
+          "    .replace(/\\//g, '_');",
+          "}",
+          "",
+          "const secret = pm.collectionVariables.get('jwtSecret');",
+          "const now = Math.floor(Date.now() / 1000);",
+          "const header = { alg: 'HS256', typ: 'JWT' };",
+          "const payload = {",
+          "  sub: 'postman-user',",
+          "  iss: 'local-dev',",
+          "  iat: now,",
+          "  exp: now + 3600,",
+          "  scope: 'orders inventory metrics docs'",
+          "};",
+          "",
+          "const encodedHeader = base64Url(CryptoJS.enc.Utf8.parse(JSON.stringify(header)));",
+          "const encodedPayload = base64Url(CryptoJS.enc.Utf8.parse(JSON.stringify(payload)));",
+          "const signingInput = encodedHeader + '.' + encodedPayload;",
+          "const signature = base64Url(CryptoJS.HmacSHA256(signingInput, secret));",
+          "pm.collectionVariables.set('jwtToken', signingInput + '.' + signature);",
+          "",
+          "if (!pm.collectionVariables.get('productId')) {",
+          "  const suffix = Date.now().toString() + '-' + Math.random().toString(16).slice(2, 8);",
+          "  pm.collectionVariables.set('productId', 'postman-' + suffix);",
+          "}",
+          "if (!pm.collectionVariables.get('idempotencyKey')) {",
+          "  pm.collectionVariables.set('idempotencyKey', 'order-' + Date.now() + '-' + Math.random().toString(16).slice(2, 8));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "gatewayBaseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "jwtSecret",
+      "value": "dev-jwt-signing-secret-change-me-32chars-minimum"
+    },
+    {
+      "key": "jwtToken",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": "PROD-002"
+    },
+    {
+      "key": "idempotencyKey",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Gateway - Public Health",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Gateway Readiness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/actuator/health/readiness",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["actuator", "health", "readiness"]
+            }
+          }
+        },
+        {
+          "name": "Gateway Liveness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/actuator/health/liveness",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["actuator", "health", "liveness"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway - Protected Ops",
+      "item": [
+        {
+          "name": "Gateway Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/actuator/info",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["actuator", "info"]
+            }
+          }
+        },
+        {
+          "name": "Gateway Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/actuator/metrics",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["actuator", "metrics"]
+            }
+          }
+        },
+        {
+          "name": "Gateway Prometheus",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/actuator/prometheus",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["actuator", "prometheus"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory Through Gateway",
+      "item": [
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('productId', body.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-create-product"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productId}}\",\n  \"name\": \"Postman Product\",\n  \"description\": \"Product created from the gateway-only Postman collection\",\n  \"category\": \"Electronics\",\n  \"brand\": \"Postman Labs\",\n  \"quantity\": 10,\n  \"reorderThreshold\": 3,\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/products",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "products"]
+            }
+          }
+        },
+        {
+          "name": "Get Product",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-get-product"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/products/{{productId}}",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-list-products"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/products?page=0&size=20",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Low Stock Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-list-low-stock"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/products?lowStockOnly=true&page=0&size=20",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "products"],
+              "query": [
+                {
+                  "key": "lowStockOnly",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-update-product"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Product Updated\",\n  \"description\": \"Updated product from Postman\",\n  \"category\": \"Electronics\",\n  \"brand\": \"Postman Labs\",\n  \"quantity\": 12,\n  \"reorderThreshold\": 3,\n  \"unitPrice\": 54.99,\n  \"currency\": \"USD\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/products/{{productId}}",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Duplicate Product - Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-duplicate-product"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productId}}\",\n  \"name\": \"Duplicate Postman Product\",\n  \"description\": \"Duplicate product request for conflict testing\",\n  \"category\": \"Electronics\",\n  \"brand\": \"Postman Labs\",\n  \"quantity\": 10,\n  \"reorderThreshold\": 3,\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/products",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "products"]
+            }
+          }
+        },
+        {
+          "name": "Reserve Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-reserve"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/reserve",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "reserve"]
+            }
+          }
+        },
+        {
+          "name": "Release Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-release"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/release",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "release"]
+            }
+          }
+        },
+        {
+          "name": "Invalid Reserve - Expect 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-invalid-reserve"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 0\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/reserve",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "reserve"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders Through Gateway",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('orderId', body.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-create-order"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2,\n  \"customerId\": \"CUST-001\",\n  \"customerName\": \"Postman Customer\",\n  \"customerEmail\": \"customer@example.com\",\n  \"shippingAddress\": \"100 Gateway Street, API City\",\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\",\n  \"notes\": \"Created through API gateway\"\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Create Order Replay - Expect 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-order-replay"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2,\n  \"customerId\": \"CUST-001\",\n  \"customerName\": \"Postman Customer\",\n  \"customerEmail\": \"customer@example.com\",\n  \"shippingAddress\": \"100 Gateway Street, API City\",\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\",\n  \"notes\": \"Created through API gateway\"\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Create Order Same Key Different Payload - Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-order-idempotency-conflict"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 3,\n  \"customerId\": \"CUST-001\",\n  \"customerName\": \"Postman Customer\",\n  \"customerEmail\": \"customer@example.com\",\n  \"shippingAddress\": \"100 Gateway Street, API City\",\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\",\n  \"notes\": \"Different payload for idempotency conflict\"\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-get-order"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders/{{orderId}}",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders", "{{orderId}}"]
+            }
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-list-orders"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders?page=0&size=20",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Orders By Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-list-orders-status"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders?status=PENDING&page=0&size=20",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Orders By Product",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-list-orders-product"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders?productId={{productId}}&page=0&size=20",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "{{productId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-cancel-order"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders/{{orderId}}/cancel",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders", "{{orderId}}", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Order Again - Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-cancel-order-again"
+              }
+            ],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders/{{orderId}}/cancel",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders", "{{orderId}}", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Create Order Missing Idempotency Key - Expect 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-missing-idempotency-key"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1,\n  \"customerId\": \"CUST-001\",\n  \"customerName\": \"Postman Customer\",\n  \"customerEmail\": \"customer@example.com\",\n  \"shippingAddress\": \"100 Gateway Street, API City\",\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Create Order Invalid Quantity - Expect 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "invalid-qty-{{$timestamp}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-invalid-order-quantity"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 0,\n  \"customerId\": \"CUST-001\",\n  \"customerName\": \"Postman Customer\",\n  \"customerEmail\": \"customer@example.com\",\n  \"shippingAddress\": \"100 Gateway Street, API City\",\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Create Order Insufficient Inventory - Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "insufficient-{{$timestamp}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "postman-insufficient-inventory"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 999,\n  \"customerId\": \"CUST-001\",\n  \"customerName\": \"Postman Customer\",\n  \"customerEmail\": \"customer@example.com\",\n  \"shippingAddress\": \"100 Gateway Street, API City\",\n  \"unitPrice\": 49.99,\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/orders",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Swagger Through Gateway",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Order Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/order/swagger-ui/index.html",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["order", "swagger-ui", "index.html"]
+            }
+          }
+        },
+        {
+          "name": "Order API Docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/order/api-docs",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["order", "api-docs"]
+            }
+          }
+        },
+        {
+          "name": "Order Swagger Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/order/api-docs/swagger-config",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["order", "api-docs", "swagger-config"]
+            }
+          }
+        },
+        {
+          "name": "Inventory Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/swagger-ui/index.html",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "swagger-ui", "index.html"]
+            }
+          }
+        },
+        {
+          "name": "Inventory API Docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/api-docs",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "api-docs"]
+            }
+          }
+        },
+        {
+          "name": "Inventory Swagger Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/api-docs/swagger-config",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "api-docs", "swagger-config"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Auth Negative Checks",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Gateway Business Without JWT - Expect 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/inventory/products/{{productId}}",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["inventory", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Gateway Prometheus Without JWT - Expect 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayBaseUrl}}/actuator/prometheus",
+              "host": ["{{gatewayBaseUrl}}"],
+              "path": ["actuator", "prometheus"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

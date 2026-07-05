@@ -1,0 +1,34 @@
+package com.app.common.exception;
+
+/**
+ * @author Aditya Sriramadas
+ * @since 2026-07-04
+ */
+public enum CommonApiErrorCode {
+    BAD_REQUEST("BAD_REQUEST"),
+    NOT_FOUND("NOT_FOUND"),
+    VALIDATION_FAILED("VALIDATION_FAILED"),
+    MALFORMED_JSON("MALFORMED_JSON"),
+    METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED"),
+    INTERNAL_ERROR("INTERNAL_ERROR"),
+    UNAUTHORIZED("UNAUTHORIZED"),
+    FORBIDDEN("FORBIDDEN"),
+    MISSING_HEADER("MISSING_HEADER"),
+    DOWNSTREAM_UNAVAILABLE("DOWNSTREAM_UNAVAILABLE"),
+    PRODUCT_NOT_FOUND("PRODUCT_NOT_FOUND"),
+    DUPLICATE_PRODUCT("DUPLICATE_PRODUCT"),
+    DUPLICATE_ORDER("DUPLICATE_ORDER"),
+    INVALID_ORDER_STATUS("INVALID_ORDER_STATUS"),
+    IDEMPOTENCY_KEY_REUSED("IDEMPOTENCY_KEY_REUSED"),
+    INSUFFICIENT_INVENTORY("INSUFFICIENT_INVENTORY");
+
+    private final String code;
+
+    CommonApiErrorCode(String code) {
+        this.code = code;
+    }
+
+    public String code() {
+        return code;
+    }
+}

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: microservices
+description: Microservices chart for order, inventory and gateway
+version: 0.1.0
+

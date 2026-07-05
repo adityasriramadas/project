@@ -1,0 +1,25 @@
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      TZ: Asia/Kolkata
+      PGTZ: Asia/Kolkata
+    command: ["postgres", "-c", "timezone=Asia/Kolkata"]
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    ports:
+      - "6379:6379"
+  inventory:
+    environment:
+      - SPRINGDOC_API_DOCS_ENABLED=true
+      - SPRINGDOC_SWAGGER_UI_ENABLED=true
+  order:
+    environment:
+      - SPRINGDOC_API_DOCS_ENABLED=true
+      - SPRINGDOC_SWAGGER_UI_ENABLED=true
+volumes:
+  pgdata:
